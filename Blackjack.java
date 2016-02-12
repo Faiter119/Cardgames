@@ -1,5 +1,6 @@
 import static javax.swing.JOptionPane.*;
 
+import java.io.*;
 import java.util.ArrayList;
 
 public class Blackjack {
@@ -22,28 +23,32 @@ public class Blackjack {
 		}
 		return out;
 	}
-	public static void main(String[]args){
+	public static void main(String[]args) throws Exception{
 		
 		boolean spill = true;
+		BufferedWriter writer = new BufferedWriter(new FileWriter("log.txt",true));
+		
 		while(spill){
-			
+		
 			Deck_Blackjack deck = new Deck_Blackjack();
 			
 			ArrayList<Card> spiller = new ArrayList<Card>();
 				spiller.add(deck.drawCard());
 				spiller.add(deck.drawCard());
 				int pSum = sum(spiller);
+				if(pSum > 21){
+					pSum = aceConvert(spiller);
+				}
 			ArrayList<Card> dealer = new ArrayList<Card>();
 				dealer.add(deck.drawCard());
 				dealer.add(deck.drawCard());
 				int dSum = sum(dealer);
-	
+										
 			String[] valgene = {"Hit me","Stand"};
-			
-			boolean go = true;
 			
 			showMessageDialog(null, "You have: "+spiller.get(0)+", "+spiller.get(1));
 			
+			boolean go = true;
 			while(go && pSum < 21 ){
 				
 				int valg = showOptionDialog(null,"Dealer has: Hidden card, "+dealer.get(1) ,"Your sum: "+pSum, YES_NO_CANCEL_OPTION,INFORMATION_MESSAGE, null, valgene,null);
@@ -71,21 +76,27 @@ public class Blackjack {
 				while(dSum < 17){
 					dealer.add(deck.drawCard());
 					dSum = sum(dealer);
-					if(dSum >21){
+					if(dSum > 21){	
 						dSum = aceConvert(dealer);
 					}
 					showMessageDialog(null, "Dealer draws: "+dealer.get(dealer.size()-1)+" - Sum: "+dSum);
 				}
 			}
-			System.out.println("Spiller");
+			System.out.println("\nSpiller");
+			writer.write("Player: \n");
 			for(int i=0; i<spiller.size(); i++ ){
+				writer.write(spiller.get(i).toString()+" \n");
 				System.out.println(spiller.get(i));
 			}
 			System.out.println("\nDealer");
+			writer.write("Dealer: \n");
 			for(int i=0; i<dealer.size(); i++ ){
+				writer.write(dealer.get(i).toString()+" \n");
 				System.out.println(dealer.get(i));
 			}
 			System.out.println("\nDealer har "+dSum+" - Du har "+pSum);
+			writer.write("Dealer: "+dSum+" - Player: "+pSum);
+			writer.newLine();
 			
 			if(pSum > 21){
 				showMessageDialog(null, "You break with "+pSum+" and lose.");
@@ -104,5 +115,10 @@ public class Blackjack {
 				spill = false;
 			}
 		}
+		writer.newLine();
+		writer.write("---------------");
+		writer.newLine();
+
+		writer.close();
 	}
 }
